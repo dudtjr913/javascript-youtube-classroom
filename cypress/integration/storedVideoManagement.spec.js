@@ -1,5 +1,5 @@
 import { YOUTUBE_API, MESSAGE, DB_KEY } from '../../src/js/constants';
-import { escape } from '../../src/js/utils/escapeSpecialCharacter.js';
+import { unescape } from '../../src/js/utils/unescapeSpecialCharacter.js';
 import { getListByKey } from '../../src/js/utils/localStorage.js';
 
 describe('저장된 비디오 관리 기능 테스트', () => {
@@ -13,7 +13,7 @@ describe('저장된 비디오 관리 기능 테스트', () => {
     cy.get('.js-no-video-found').should('have.class', 'no-watching');
   });
 
-  it.only('저장된 영상이 있는 경우에 페이지를 다시 방문하면, 시청중인 영상 목록을 표시한다.', () => {
+  it('저장된 영상이 있는 경우에 페이지를 다시 방문하면, 시청중인 영상 목록을 표시한다.', () => {
     const savedVideoTitles = [];
 
     cy.get('.js-search-menu-button').click();
@@ -34,7 +34,7 @@ describe('저장된 비디오 관리 기능 테스트', () => {
     cy.get('.js-saved-videos-wrapper .js-video-title').each(($el, index) => {
       cy.wrap($el)
         .invoke('text')
-        .then((title) => expect(escape(title)).to.be.eq(savedVideoTitles[index]));
+        .then((title) => expect(unescape(title)).to.be.eq(savedVideoTitles[index]));
     });
   });
 
@@ -135,13 +135,7 @@ describe('저장된 비디오 관리 기능 테스트', () => {
       cy.wrap($el).click();
     });
 
-    cy.get('.js-saved-videos-wrapper .watching').each(($el) => cy.wrap($el).should('be.visible'));
-    cy.get('.js-saved-videos-wrapper .watched').each(($el) => cy.wrap($el).should('not.be.visible'));
-    cy.get('.js-saved-videos-wrapper .liked').each(($el) => cy.wrap($el).should('not.be.visible'));
-
     cy.get('.js-liked-menu-button').click();
-    cy.get('.js-saved-videos-wrapper .watching').each(($el) => cy.wrap($el).should('not.be.visible'));
-    cy.get('.js-saved-videos-wrapper .watched').each(($el) => cy.wrap($el).should('not.be.visible'));
     cy.get('.js-saved-videos-wrapper .liked').each(($el) => cy.wrap($el).should('be.visible'));
   });
 
@@ -152,11 +146,16 @@ describe('저장된 비디오 관리 기능 테스트', () => {
     cy.get('.js-search-keyword-form').submit();
     cy.wait(2000);
     cy.get('.js-save-button').eq(FIRST_INDEX).click();
-    cy.get('.js-modal-close-button').click();
-
-    expect(false).to.be.eq(getListByKey(DB_KEY.VIDEOS)[FIRST_INDEX].isLiked);
-    cy.get('.js-like-button').click();
-    expect(true).to.be.eq(getListByKey(DB_KEY.VIDEOS)[FIRST_INDEX].isLiked);
+    cy.get('.js-modal-close-button')
+      .click()
+      .then(() => {
+        expect(false).to.be.eq(getListByKey(DB_KEY.VIDEOS)[FIRST_INDEX].isLiked);
+      });
+    cy.get('.js-like-button')
+      .click()
+      .then(() => {
+        expect(true).to.be.eq(getListByKey(DB_KEY.VIDEOS)[FIRST_INDEX].isLiked);
+      });
   });
 
   it('좋아요 버튼을 다시 클릭하면 좋아요가 해지된다.', () => {
