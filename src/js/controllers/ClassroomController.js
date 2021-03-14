@@ -19,6 +19,16 @@ export default class ClassroomController {
     this.view.$likedMenuButton.addEventListener('click', this.onNavigateLikedVideos.bind(this));
   }
 
+  onShowClassroom() {
+    this.view.renderVideosToPrepare(this.model.videos);
+
+    if (isWatchingMenu(this.view.$savedVideosWrapper)) {
+      this.showWatchingVideos();
+      return;
+    }
+    this.showWatchedVideos();
+  }
+
   onRequestVideoManagement({ target }) {
     if (!target.classList.contains('video-manage-btn')) {
       return;
@@ -54,16 +64,6 @@ export default class ClassroomController {
     this.showLikedVideos();
   }
 
-  onShowClassroom() {
-    this.view.renderVideosToPrepare(this.model.videos);
-
-    if (isWatchingMenu(this.view.$savedVideosWrapper)) {
-      this.showWatchingVideos();
-      return;
-    }
-    this.showWatchedVideos();
-  }
-
   showWatchingVideos() {
     this.view.renderOnlyWatchingVideos();
     this.showImageNoWatchingVideoSaved();
@@ -77,17 +77,6 @@ export default class ClassroomController {
   showLikedVideos() {
     this.view.renderOnlyLikedVideos();
     this.showImageNoLikedVideoSaved();
-  }
-
-  showImageNoVideo() {
-    if (isLikedMenu(this.view.$savedVideosWrapper)) {
-      this.showImageNoLikedVideoSaved();
-      return;
-    }
-
-    isWatchingMenu(this.view.$savedVideosWrapper)
-      ? this.showImageNoWatchingVideoSaved()
-      : this.showImageNoWatchedVideoSaved();
   }
 
   showImageNoWatchingVideoSaved() {
@@ -106,7 +95,7 @@ export default class ClassroomController {
 
   showImageNoLikedVideoSaved() {
     if (this.model.hasNoLikedVideoSaved()) {
-      this.model.hasNoWatchingVideoSaved()
+      this.model.hasNoWatchingVideoSaved() && this.model.hasNoWatchedVideoSaved()
         ? this.view.renderImageNoWatchingVideo()
         : this.view.renderImageNoLikedVideo();
     }
@@ -136,5 +125,16 @@ export default class ClassroomController {
       ? this.view.renderNotification(MESSAGE.UNCHECK_LIKE_BUTTON)
       : this.view.renderNotification(MESSAGE.CHECK_LIKE_BUTTON);
     isLikedMenu(this.view.$savedVideosWrapper) && this.showImageNoLikedVideoSaved();
+  }
+
+  showImageNoVideo() {
+    if (isLikedMenu(this.view.$savedVideosWrapper)) {
+      this.showImageNoLikedVideoSaved();
+      return;
+    }
+
+    isWatchingMenu(this.view.$savedVideosWrapper)
+      ? this.showImageNoWatchingVideoSaved()
+      : this.showImageNoWatchedVideoSaved();
   }
 }

@@ -57,7 +57,7 @@ export default class ClassroomView {
     this.$watchingMenuButton.classList.add('bg-cyan-100');
     this.$watchedMenuButton.classList.remove('bg-cyan-100');
     this.$likedMenuButton.classList.remove('bg-cyan-100');
-    this.$noVideoFound.classList.remove(NO_WATCHING, NO_WATCHED, NO_LIKED);
+    this.removeAllNoVideoClass();
     this.$savedVideosWrapper.classList.remove(WATCHED_SECTION, LIKED_SECTION);
     this.$savedVideosWrapper.classList.add(WATCHING_SECTION);
   }
@@ -66,7 +66,7 @@ export default class ClassroomView {
     this.$watchedMenuButton.classList.add('bg-cyan-100');
     this.$watchingMenuButton.classList.remove('bg-cyan-100');
     this.$likedMenuButton.classList.remove('bg-cyan-100');
-    this.$noVideoFound.classList.remove(NO_WATCHING, NO_WATCHED, NO_LIKED);
+    this.removeAllNoVideoClass();
     this.$savedVideosWrapper.classList.remove(WATCHING_SECTION, LIKED_SECTION);
     this.$savedVideosWrapper.classList.add(WATCHED_SECTION);
   }
@@ -75,7 +75,7 @@ export default class ClassroomView {
     this.$likedMenuButton.classList.add('bg-cyan-100');
     this.$watchingMenuButton.classList.remove('bg-cyan-100');
     this.$watchedMenuButton.classList.remove('bg-cyan-100');
-    this.$noVideoFound.classList.remove(NO_WATCHING, NO_WATCHED, NO_LIKED);
+    this.removeAllNoVideoClass();
     this.$savedVideosWrapper.classList.remove(WATCHING_SECTION, WATCHED_SECTION);
     this.$savedVideosWrapper.classList.add(LIKED_SECTION);
   }
@@ -98,6 +98,10 @@ export default class ClassroomView {
 
   removeVideo($video) {
     $video.remove();
+  }
+
+  removeAllNoVideoClass() {
+    this.$noVideoFound.classList.remove(NO_WATCHING, NO_WATCHED, NO_LIKED);
   }
 
   renderNotification(message) {
