@@ -55,30 +55,21 @@ export default class ClassroomView {
   }
 
   renderOnlyWatchingVideos() {
-    this.$watchingMenuButton.classList.add('bg-cyan-100');
-    this.$watchedMenuButton.classList.remove('bg-cyan-100');
-    this.$likedMenuButton.classList.remove('bg-cyan-100');
+    this.setSelectedMenu(this.$watchingMenuButton);
     this.removeAllNoVideoClass();
-    this.$savedVideosWrapper.classList.remove(WATCHED_SECTION, LIKED_SECTION);
-    this.$savedVideosWrapper.classList.add(WATCHING_SECTION);
+    this.setSection(WATCHING_SECTION);
   }
 
   renderOnlyWatchedVideos() {
-    this.$watchedMenuButton.classList.add('bg-cyan-100');
-    this.$watchingMenuButton.classList.remove('bg-cyan-100');
-    this.$likedMenuButton.classList.remove('bg-cyan-100');
+    this.setSelectedMenu(this.$watchedMenuButton);
     this.removeAllNoVideoClass();
-    this.$savedVideosWrapper.classList.remove(WATCHING_SECTION, LIKED_SECTION);
-    this.$savedVideosWrapper.classList.add(WATCHED_SECTION);
+    this.setSection(WATCHED_SECTION);
   }
 
   renderOnlyLikedVideos() {
-    this.$likedMenuButton.classList.add('bg-cyan-100');
-    this.$watchingMenuButton.classList.remove('bg-cyan-100');
-    this.$watchedMenuButton.classList.remove('bg-cyan-100');
+    this.setSelectedMenu(this.$likedMenuButton);
     this.removeAllNoVideoClass();
-    this.$savedVideosWrapper.classList.remove(WATCHING_SECTION, WATCHED_SECTION);
-    this.$savedVideosWrapper.classList.add(LIKED_SECTION);
+    this.setSection(LIKED_SECTION);
   }
 
   renderMovedVideo($video, wasWatching) {
@@ -95,6 +86,19 @@ export default class ClassroomView {
   renderToggleLikedVideo($video) {
     $video.querySelector('.js-like-button').classList.toggle(CHECKED);
     $video.classList.toggle(LIKED);
+  }
+
+  setSelectedMenu($selectedMenu) {
+    this.$watchingMenuButton.classList.remove('bg-cyan-100');
+    this.$watchedMenuButton.classList.remove('bg-cyan-100');
+    this.$likedMenuButton.classList.remove('bg-cyan-100');
+
+    $selectedMenu.classList.add('bg-cyan-100');
+  }
+
+  setSection(className) {
+    this.$savedVideosWrapper.classList.remove(WATCHING_SECTION, WATCHED_SECTION, LIKED_SECTION);
+    this.$savedVideosWrapper.classList.add(className);
   }
 
   removeVideo($video) {
