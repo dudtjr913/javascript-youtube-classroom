@@ -1,4 +1,4 @@
-import { isWatchingMenu, isWatchingVideo } from './elementValidator.js';
+import { isWatchingMenu, isWatchingVideo, isLikedVideo, isLikedMenu } from './elementValidator.js';
 import { MESSAGE } from '../constants.js';
 
 export default class ClassroomController {
@@ -16,15 +16,16 @@ export default class ClassroomController {
     this.view.$savedVideosWrapper.addEventListener('click', this.onRequestVideoManagement.bind(this));
     this.view.$watchingMenuButton.addEventListener('click', this.onNavigateWatchingVideos.bind(this));
     this.view.$watchedMenuButton.addEventListener('click', this.onNavigateWatchedVideos.bind(this));
+    this.view.$likedMenuButton.addEventListener('click', this.onNavigateLikedVideos.bind(this));
   }
 
   onRequestVideoManagement({ target }) {
     if (!target.classList.contains('video-manage-btn')) {
       return;
     }
-
     const $video = target.closest('article');
     const isWatching = isWatchingVideo($video);
+    const isLiked = isLikedVideo($video);
 
     if (target.classList.contains('js-check-button')) {
       this.moveVideo($video, isWatching);
@@ -32,7 +33,12 @@ export default class ClassroomController {
     }
 
     if (target.classList.contains('js-remove-button')) {
-      this.removeVideo($video, isWatching);
+      this.removeVideo($video, isWatching, isLiked);
+      return;
+    }
+
+    if (target.classList.contains('js-like-button')) {
+      this.toggleLikedVideo($video, isLiked);
     }
   }
 
@@ -42,6 +48,10 @@ export default class ClassroomController {
 
   onNavigateWatchedVideos() {
     this.showWatchedVideos();
+  }
+
+  onNavigateLikedVideos() {
+    this.showLikedVideos();
   }
 
   onShowClassroom() {
@@ -64,7 +74,17 @@ export default class ClassroomController {
     this.showImageNoWatchedVideoSaved();
   }
 
+  showLikedVideos() {
+    this.view.renderOnlyLikedVideos();
+    this.showImageNoLikedVideoSaved();
+  }
+
   showImageNoVideo() {
+    if (isLikedMenu(this.view.$savedVideosWrapper)) {
+      this.showImageNoLikedVideoSaved();
+      return;
+    }
+
     isWatchingMenu(this.view.$savedVideosWrapper)
       ? this.showImageNoWatchingVideoSaved()
       : this.showImageNoWatchedVideoSaved();
@@ -84,6 +104,14 @@ export default class ClassroomController {
     }
   }
 
+  showImageNoLikedVideoSaved() {
+    if (this.model.hasNoLikedVideoSaved()) {
+      this.model.hasNoWatchingVideoSaved()
+        ? this.view.renderImageNoWatchingVideo()
+        : this.view.renderImageNoLikedVideo();
+    }
+  }
+
   moveVideo($video, isWatching) {
     this.model.moveVideo($video.id);
     this.view.renderMovedVideo($video, isWatching);
@@ -93,11 +121,20 @@ export default class ClassroomController {
     this.showImageNoVideo();
   }
 
-  removeVideo($video, isWatching) {
+  removeVideo($video, isWatching, isLiked) {
     if (!window.confirm(MESSAGE.ARE_YOU_SURE_TO_REMOVE_VIDEO)) return;
-    this.model.removeVideo($video.id, isWatching);
+    this.model.removeVideo($video.id, isWatching, isLiked);
     this.view.removeVideo($video);
     this.view.renderNotification(MESSAGE.VIDEO_IS_REMOVED_SUCCESSFULLY);
     this.showImageNoVideo();
+  }
+
+  toggleLikedVideo($video, isLiked) {
+    this.model.toggleLikedVideo($video.id);
+    this.view.renderToggleLikedVideo($video);
+    isLiked
+      ? this.view.renderNotification(MESSAGE.UNCHECK_LIKE_BUTTON)
+      : this.view.renderNotification(MESSAGE.CHECK_LIKE_BUTTON);
+    isLikedMenu(this.view.$savedVideosWrapper) && this.showImageNoLikedVideoSaved();
   }
 }

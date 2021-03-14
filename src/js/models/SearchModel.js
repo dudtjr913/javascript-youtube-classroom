@@ -1,4 +1,4 @@
-import { getListByKey, insertItemByKey, setListByKey } from '../utils/localStorage.js';
+import { getListByKey, setListByKey } from '../utils/localStorage.js';
 import { MAX_RECENT_KEYWORD_COUNT, DB_KEY } from '../constants.js';
 
 /*
@@ -18,14 +18,14 @@ export default class SearchModel {
     this.nextPageToken = '';
     this.totalSearchResult = [];
     this.keyword = keyword;
-    this.saveKeyword();
+    this.updateKeyword();
   }
 
   setNextPageToken(token) {
     this.nextPageToken = token;
   }
 
-  saveKeyword() {
+  updateKeyword() {
     if (this.keyword === '') {
       return;
     }
@@ -33,9 +33,11 @@ export default class SearchModel {
     if (this.recentKeywords.includes(this.keyword)) {
       return;
     }
+
     if (this.recentKeywords.length === MAX_RECENT_KEYWORD_COUNT) {
       this.recentKeywords.pop();
     }
+
     this.recentKeywords.unshift(this.keyword);
     setListByKey(DB_KEY.RECENT_KEYWORDS, this.recentKeywords);
   }
@@ -59,11 +61,5 @@ export default class SearchModel {
 
   getTargetVideoData(targetId) {
     return this.totalSearchResult.find((video) => video.videoId === targetId);
-  }
-
-  saveVideo(targetVideo) {
-    targetVideo.isSaved = true;
-    targetVideo.isWatching = true;
-    insertItemByKey(DB_KEY.VIDEOS, targetVideo);
   }
 }

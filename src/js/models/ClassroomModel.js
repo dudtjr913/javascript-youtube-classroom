@@ -1,16 +1,32 @@
-import { getListByKey, setListByKey, deleteTargetItemByKey } from '../utils/localStorage.js';
+import { getListByKey, setListByKey } from '../utils/localStorage.js';
 import { DB_KEY } from '../constants.js';
 
 export default class ClassroomModel {
   constructor() {
-    this.init();
+    this.videos = getListByKey(DB_KEY.VIDEOS);
+    this.watchingVideoCount = this.getWatchingVideoCount();
+    this.watchedVideoCount = this.getWatchedVideoCount();
+    this.likedVideoCount = this.getLikedVideoCount();
   }
 
-  init() {
-    this.videos = getListByKey(DB_KEY.VIDEOS);
-    this.videosCount = this.videos.length;
-    this.watchingVideoCount = this.videos.filter((video) => video.isWatching).length;
-    this.watchedVideoCount = this.videosCount - this.watchingVideoCount;
+  getVideo(videoId) {
+    return this.videos.find((video) => video.videoId === videoId);
+  }
+
+  getVideoCount() {
+    return this.videos.length;
+  }
+
+  getLikedVideoCount() {
+    return this.videos.filter((video) => video.isLiked).length;
+  }
+
+  getWatchingVideoCount() {
+    return this.videos.filter((video) => video.isWatching).length;
+  }
+
+  getWatchedVideoCount() {
+    return this.videos.filter((video) => !video.isWatching).length;
   }
 
   isOnlyWatchingVideoSaved() {
@@ -25,26 +41,50 @@ export default class ClassroomModel {
     return this.watchedVideoCount === 0;
   }
 
+  hasNoLikedVideoSaved() {
+    return this.likedVideoCount === 0;
+  }
+
+  saveVideo(targetVideo) {
+    targetVideo.isSaved = true;
+    targetVideo.isWatching = true;
+    targetVideo.isLiked = false;
+    this.videos.push(targetVideo);
+    this.updateWatchingVideoCount();
+    setListByKey(DB_KEY.VIDEOS, this.videos);
+  }
+
+  toggleLikedVideo(videoId) {
+    const target = this.getVideo(videoId);
+    target.isLiked = !target.isLiked;
+    this.updateLikedVideoCount();
+    setListByKey(DB_KEY.VIDEOS, this.videos);
+  }
+
   moveVideo(videoId) {
-    const videos = getListByKey(DB_KEY.VIDEOS);
-    const target = videos.find((video) => video.videoId === videoId);
-
+    const target = this.getVideo(videoId);
     target.isWatching = !target.isWatching;
-    this.updateWatchingVideoCount(target.isWatching);
-    this.updateWatchedVideoCount(!target.isWatching);
-    setListByKey(DB_KEY.VIDEOS, videos);
+    this.updateWatchingVideoCount();
+    this.updateWatchedVideoCount();
+    setListByKey(DB_KEY.VIDEOS, this.videos);
   }
 
-  updateWatchingVideoCount(isWatching) {
-    this.watchingVideoCount += isWatching ? 1 : -1;
+  removeVideo(videoId, isWatching, isLiked) {
+    this.videos = this.videos.filter((video) => video.videoId !== videoId);
+    isWatching ? this.updateWatchingVideoCount() : this.updateWatchedVideoCount();
+    isLiked && this.updateLikedVideoCount();
+    setListByKey(DB_KEY.VIDEOS, this.videos);
   }
 
-  updateWatchedVideoCount(isWatched) {
-    this.watchedVideoCount += isWatched ? 1 : -1;
+  updateWatchingVideoCount() {
+    this.watchingVideoCount = this.getWatchingVideoCount();
   }
 
-  removeVideo(videoId, isWatching) {
-    deleteTargetItemByKey({ key: DB_KEY.VIDEOS, secondKey: 'videoId' }, videoId);
-    isWatching ? (this.watchingVideoCount -= 1) : (this.watchedVideoCount -= 1);
+  updateWatchedVideoCount() {
+    this.watchedVideoCount = this.getWatchedVideoCount();
+  }
+
+  updateLikedVideoCount() {
+    this.likedVideoCount = this.getLikedVideoCount();
   }
 }
